@@ -56,6 +56,7 @@
       justify-content: space-between;
       gap: 20px;
       margin-bottom: 28px;
+      animation: rise-in .55s both;
     }
 
     h1 {
@@ -80,6 +81,12 @@
       border-radius: 20px;
       background: var(--paper);
       box-shadow: var(--shadow);
+      animation: rise-in .65s .08s both;
+    }
+
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .card-top {
@@ -196,6 +203,22 @@
       color: var(--green-dark);
     }
 
+    .filter-count {
+      display: inline-grid;
+      min-width: 18px;
+      height: 18px;
+      margin-left: 3px;
+      place-items: center;
+      border-radius: 99px;
+      background: rgb(32 39 32 / 6%);
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .filter[aria-pressed="true"] .filter-count {
+      background: rgb(84 119 94 / 12%);
+    }
+
     .clear-button {
       border: 0;
       padding: 7px 0 7px 7px;
@@ -220,12 +243,22 @@
       gap: 13px;
       min-height: 58px;
       border-top: 1px solid #f0f1ed;
-      animation: appear .2s ease-out;
+      animation: appear .32s cubic-bezier(.2, .75, .25, 1) both;
+      animation-delay: calc(var(--task-index, 0) * 35ms);
     }
 
     @keyframes appear {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .task.is-removing {
+      animation: task-out .2s ease-in both;
+      pointer-events: none;
+    }
+
+    @keyframes task-out {
+      to { opacity: 0; transform: translateX(12px); }
     }
 
     .task-check {
@@ -246,6 +279,11 @@
     .task-check[aria-pressed="true"] {
       border-color: var(--green);
       background: var(--green);
+      animation: check-pop .28s cubic-bezier(.2, 1.5, .5, 1);
+    }
+
+    @keyframes check-pop {
+      50% { transform: scale(1.2); }
     }
 
     .task-check[aria-pressed="true"]::after {
@@ -379,8 +417,8 @@
       <div class="list-header">
         <div class="filters" role="group" aria-label="Filter tasks">
           <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
-          <button class="filter" type="button" data-filter="active" aria-pressed="false">To do</button>
-          <button class="filter" type="button" data-filter="done" aria-pressed="false">Done</button>
+          <button class="filter" type="button" data-filter="active" aria-pressed="false">Pending <span class="filter-count" id="pending-count">0</span></button>
+          <button class="filter" type="button" data-filter="done" aria-pressed="false">Completed <span class="filter-count" id="completed-count">0</span></button>
         </div>
         <button class="clear-button" id="clear-completed" type="button">Clear completed</button>
       </div>
@@ -455,13 +493,16 @@
       document.querySelector("#progress-label").textContent = `${percentage}% complete`;
       document.querySelector("#progress").setAttribute("aria-valuenow", String(percentage));
       document.querySelector("#progress-bar").style.width = `${percentage}%`;
+      document.querySelector("#pending-count").textContent = String(activeTasks);
+      document.querySelector("#completed-count").textContent = String(completedTasks);
       document.querySelector("#remaining-count").textContent =
         `${activeTasks} ${activeTasks === 1 ? "task" : "tasks"} left`;
 
       list.replaceChildren();
-      for (const task of visibleTasks) {
+      visibleTasks.forEach((task, index) => {
         const item = document.createElement("li");
         item.className = `task${task.done ? " is-done" : ""}`;
+        item.style.setProperty("--task-index", String(index));
 
         const toggle = document.createElement("button");
         toggle.className = "task-check";
@@ -484,14 +525,19 @@
         remove.textContent = "×";
         remove.setAttribute("aria-label", `Delete: ${task.text}`);
         remove.addEventListener("click", () => {
-          tasks = tasks.filter(candidate => candidate.id !== task.id);
-          saveTasks();
-          render();
+          remove.disabled = true;
+          item.classList.add("is-removing");
+          item.addEventListener("animationend", event => {
+            if (event.animationName !== "task-out") return;
+            tasks = tasks.filter(candidate => candidate.id !== task.id);
+            saveTasks();
+            render();
+          });
         });
 
         item.append(toggle, text, remove);
         list.append(item);
-      }
+      });
 
       const isEmpty = visibleTasks.length === 0;
       list.hidden = isEmpty;

@@ -9,9 +9,10 @@ Open `index.html` in a modern web browser. Add a task using the input field and 
 ## Features
 
 - Add tasks, mark them complete, or delete them.
-- Filter the list to show all, active, or completed tasks.
+- Filter the list to show all, pending (not completed), or completed tasks, with counts for each status.
 - Clear all completed tasks at once.
 - Track your progress and remaining tasks.
+- Enjoy subtle entrance, task, completion, and deletion animations.
 - Automatically save tasks in the browser's local storage.
 - Use on desktop or mobile screens.
 
