@@ -8,6 +8,7 @@ Open `index.html` in a modern web browser. Add a task using the input field and 
 
 ## Features
 
+- Use the navigation bar to switch between all tasks, tasks to do, and completed tasks.
 - Add tasks, mark them complete, or delete them.
 - Filter the list to show all, pending (not completed), or completed tasks, with counts for each status.
 - Clear all completed tasks at once.
