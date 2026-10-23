@@ -41,6 +41,65 @@
       margin: 0 auto;
     }
 
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 42px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -.04em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--green);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .brand:hover .brand-mark {
+      transform: rotate(-7deg) scale(1.05);
+      background: var(--green-dark);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-link {
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      text-decoration: none;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link[aria-current="page"] {
+      background: var(--green-pale);
+      color: var(--green-dark);
+    }
+
     .eyebrow {
       margin: 0 0 12px;
       color: var(--green);
@@ -172,28 +231,9 @@
       justify-content: space-between;
       gap: 12px;
       padding: 0 28px 13px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 4px;
-    }
-
-    .filter {
-      border: 0;
-      border-radius: 7px;
-      padding: 7px 10px;
-      background: transparent;
       color: var(--muted);
-      cursor: pointer;
       font-size: 12px;
-      font-weight: 600;
-    }
-
-    .filter:hover { color: var(--ink); }
-    .filter[aria-pressed="true"] {
-      background: var(--green-pale);
-      color: var(--green-dark);
+      font-weight: 650;
     }
 
     .clear-button {
@@ -331,6 +371,11 @@
 
     @media (max-width: 520px) {
       body { padding: 42px 16px; }
+      .navbar { margin-bottom: 34px; }
+      .brand { gap: 8px; font-size: 14px; }
+      .brand-mark { width: 30px; height: 30px; }
+      .nav-links { gap: 1px; }
+      .nav-link { padding: 8px 9px; font-size: 11px; }
       .page-heading { align-items: flex-start; }
       .today { margin-top: 7px; font-size: 11px; }
       .card-top { padding: 22px 20px 19px; }
@@ -351,7 +396,19 @@
   </style>
 </head>
 <body>
-  <main class="app">
+  <main class="app" id="top">
+    <nav class="navbar" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Daylist home">
+        <span class="brand-mark" aria-hidden="true">✓</span>
+        <span>daylist</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#task-list" data-filter="all" aria-current="page">All tasks</a>
+        <a class="nav-link" href="#task-list" data-filter="active">To do</a>
+        <a class="nav-link" href="#task-list" data-filter="done">Done</a>
+      </div>
+    </nav>
+
     <header class="page-heading">
       <div>
         <p class="eyebrow">A little more clarity</p>
@@ -377,11 +434,7 @@
       </form>
 
       <div class="list-header">
-        <div class="filters" role="group" aria-label="Filter tasks">
-          <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
-          <button class="filter" type="button" data-filter="active" aria-pressed="false">To do</button>
-          <button class="filter" type="button" data-filter="done" aria-pressed="false">Done</button>
-        </div>
+        <span>Tasks</span>
         <button class="clear-button" id="clear-completed" type="button">Clear completed</button>
       </div>
 
@@ -404,7 +457,7 @@
     const input = document.querySelector("#task-input");
     const list = document.querySelector("#task-list");
     const emptyState = document.querySelector("#empty-state");
-    const filters = document.querySelectorAll(".filter");
+    const navLinks = document.querySelectorAll(".nav-link");
     let currentFilter = "all";
     let tasks = loadTasks();
 
@@ -413,6 +466,18 @@
       month: "long",
       day: "numeric"
     }).format(new Date());
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      navLinks.forEach(link => {
+        if (link.dataset.filter === currentFilter) {
+          link.setAttribute("aria-current", "page");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+      render();
+    }
 
     function loadTasks() {
       try {
@@ -512,19 +577,15 @@
         return;
       }
       tasks.unshift({ id: crypto.randomUUID(), text, done: false });
-      currentFilter = "all";
-      filters.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.filter === currentFilter)));
+      setFilter("all");
       saveTasks();
-      render();
       form.reset();
       input.focus();
     });
 
-    filters.forEach(button => {
-      button.addEventListener("click", () => {
-        currentFilter = button.dataset.filter;
-        filters.forEach(filter => filter.setAttribute("aria-pressed", String(filter === button)));
-        render();
+    navLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        setFilter(link.dataset.filter);
       });
     });
 
