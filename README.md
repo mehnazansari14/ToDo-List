@@ -1,4 +1,4 @@
-# My To-Do List
+# My To-Do List App
 
 A simple, responsive to-do list that runs in your web browser. It is built as a standalone HTML page, so no installation or build step is needed.
 
