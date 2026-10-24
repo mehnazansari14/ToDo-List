@@ -1,10 +1,10 @@
 # My To-Do List
 
-A simple, responsive to-do list that runs in your web browser. The page markup, styles, and behavior live in `index.html`, `styles.css`, and the page's JavaScript, so no installation or build step is needed.
+A simple, responsive to-do list that runs in your web browser. It is built as a standalone HTML page, so no installation or build step is needed.
 
 ## Getting started
 
-Open `index.html` in a modern web browser. Keep `styles.css` next to it so the page styles load. Add a task using the input field and select **Add task** or press Enter.
+Open `index.html` in a modern web browser. Add a task using the input field and select **Add task** or press Enter.
 
 ## Features
 
